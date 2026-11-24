@@ -39,9 +39,10 @@ const SIM_ICONS = {
 function simMenuHTML() {
   const isRahbar = !S.sim || (S.sim.role === "rahbar" && !S.sim.staffId);
   const activeSid = S.sim && S.sim.staffId;
+  const rahbarTab = isRahbar && simFilter === "all";
   const dock = `<div class="sim-dock" role="tablist" aria-label="Rol toifalari">
-    <button type="button" class="${isRahbar ? "active" : ""}" data-action="sim-pick" data-v="rahbar|">${SIM_ICONS.home}<span>Rahbar</span></button>
-    <button type="button" class="${simFilter === "all" && !isRahbar ? "active" : (simFilter === "all" ? "on" : "")}" data-action="sim-filter" data-v="all">${SIM_ICONS.files}<span>Hammasi</span></button>
+    <button type="button" class="${rahbarTab ? "active" : ""}" data-action="sim-pick" data-v="rahbar|">${SIM_ICONS.home}<span>Rahbar</span></button>
+    <button type="button" class="${simFilter === "all" && !isRahbar ? "active" : ""}" data-action="sim-filter" data-v="all">${SIM_ICONS.files}<span>Hammasi</span></button>
     <button type="button" class="${simFilter === "boshliq" ? "active" : ""}" data-action="sim-filter" data-v="boshliq">${SIM_ICONS.plans}<span>Boshliq</span></button>
     <button type="button" class="${simFilter === "xodim" ? "active" : ""}" data-action="sim-filter" data-v="xodim">${SIM_ICONS.cogs}<span>Xodim</span></button>
   </div>`;

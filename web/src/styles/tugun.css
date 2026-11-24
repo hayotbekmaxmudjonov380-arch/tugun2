@@ -981,3 +981,897 @@ html:root .seg[data-wl-pill="on"] > a[aria-current="page"] {
   }
 }
 
+/* ================= Liquid Glass Calendar ================= */
+input[type="date"] {
+  cursor: pointer;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.68;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+input[type="date"]:hover::-webkit-calendar-picker-indicator,
+input[type="date"].lg-cal-active::-webkit-calendar-picker-indicator {
+  opacity: 1;
+  transform: scale(1.06);
+}
+input[type="date"].lg-cal-active {
+  background: var(--surface);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.lg-cal {
+  --cal-ease: cubic-bezier(0.3, 1.5, 0.5, 1);
+  position: fixed;
+  z-index: 120;
+  padding: 14px;
+  border-radius: 26px;
+  display: grid;
+  gap: 10px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.64) 0%, rgba(226, 239, 255, 0.36) 52%, rgba(255, 255, 255, 0.50) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(26px) saturate(195%) brightness(1.05);
+  -webkit-backdrop-filter: blur(26px) saturate(195%) brightness(1.05);
+  box-shadow:
+    0 22px 54px rgba(15, 23, 42, 0.20),
+    0 4px 14px rgba(0, 112, 244, 0.08);
+  transform-origin: top left;
+  user-select: none;
+}
+.lg-cal.is-above { transform-origin: bottom left; }
+.lg-cal[hidden] { display: none; }
+.lg-cal::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    inset 2px 2px 6px -2px rgba(255, 255, 255, 0.85),
+    inset -2px -2px 6px 1px rgba(255, 255, 255, 0.45),
+    inset 0 -2px 0 rgba(255, 255, 255, 0.35);
+  pointer-events: none;
+  z-index: 2;
+}
+.lg-cal.is-open {
+  animation: lgCalIn 0.24s cubic-bezier(0.34, 1.45, 0.64, 1);
+}
+@keyframes lgCalIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.95); }
+  to { opacity: 1; transform: none; }
+}
+.lg-cal.is-above.is-open {
+  animation: lgCalInUp 0.24s cubic-bezier(0.34, 1.45, 0.64, 1);
+}
+@keyframes lgCalInUp {
+  from { opacity: 0; transform: translateY(6px) scale(0.95); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-mode="day"]) .lg-cal {
+    background: linear-gradient(155deg, rgba(24, 34, 58, 0.78) 0%, rgba(12, 18, 34, 0.64) 100%);
+    border-color: rgba(255, 255, 255, 0.22);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.56), 0 4px 16px rgba(10, 132, 255, 0.14);
+  }
+  :root:not([data-theme="light"]):not([data-mode="day"]) .lg-cal::after {
+    box-shadow:
+      inset 1.5px 1.5px 4px -1px rgba(255, 255, 255, 0.24),
+      inset -1.5px -1.5px 4px 0 rgba(255, 255, 255, 0.10);
+  }
+}
+:root[data-theme="dark"]:not([data-mode="day"]) .lg-cal,
+:root[data-mode="night"] .lg-cal {
+  background: linear-gradient(155deg, rgba(24, 34, 58, 0.78) 0%, rgba(12, 18, 34, 0.64) 100%);
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.56), 0 4px 16px rgba(10, 132, 255, 0.14);
+}
+:root[data-theme="dark"]:not([data-mode="day"]) .lg-cal::after,
+:root[data-mode="night"] .lg-cal::after {
+  box-shadow:
+    inset 1.5px 1.5px 4px -1px rgba(255, 255, 255, 0.24),
+    inset -1.5px -1.5px 4px 0 rgba(255, 255, 255, 0.10);
+}
+
+.lg-cal-head {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.lg-cal-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.34);
+  color: var(--ink);
+  font: 600 14px/1.2 var(--font-display);
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  transition: background 0.18s var(--cal-ease), transform 0.18s var(--cal-ease);
+}
+.lg-cal-title:hover {
+  background: rgba(255, 255, 255, 0.58);
+  transform: scale(1.02);
+}
+.lg-cal-title:active { transform: scale(0.97); }
+.lg-cal-caret { width: 15px; height: 15px; opacity: 0.72; transition: transform 0.2s var(--cal-ease); }
+.lg-cal-title[aria-expanded="true"] .lg-cal-caret { transform: rotate(180deg); }
+
+.lg-cal-arrows { display: inline-flex; align-items: center; gap: 6px; }
+.lg-cal-nav {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.32);
+  color: var(--ink);
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  transition: background 0.18s var(--cal-ease), transform 0.18s var(--cal-ease), color 0.18s ease;
+}
+.lg-cal-nav svg { width: 16px; height: 16px; display: block; }
+.lg-cal-nav:hover {
+  background: rgba(255, 255, 255, 0.66);
+  color: var(--accent);
+  transform: scale(1.06);
+}
+.lg-cal-nav:active { transform: scale(0.94); }
+
+.lg-cal-wd {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 3px;
+  padding: 2px 0;
+}
+.lg-cal-wd span {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.lg-cal-wd span.is-wknd { opacity: 0.78; }
+
+.lg-cal-grid {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 3px;
+}
+.lg-cal-day {
+  position: relative;
+  height: 36px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  font: 500 13px/1 var(--font-body);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background 0.16s var(--cal-ease), transform 0.16s var(--cal-ease), color 0.14s ease, box-shadow 0.2s ease;
+}
+.lg-cal-day.is-out {
+  opacity: 0.36;
+}
+.lg-cal-day.is-wknd:not(.is-selected) {
+  color: color-mix(in srgb, var(--ink) 78%, var(--accent));
+}
+.lg-cal-day:hover:not(.is-selected) {
+  background: rgba(255, 255, 255, 0.56);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  transform: scale(1.06);
+}
+.lg-cal-day:active { transform: scale(0.94); }
+.lg-cal-day.is-today:not(.is-selected) {
+  background: rgba(10, 132, 255, 0.14);
+  color: var(--accent);
+  font-weight: 700;
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+.lg-cal-day.is-selected,
+.lg-cal-mbtn.is-selected {
+  background: linear-gradient(145deg, #2795ff 0%, #0a84ff 55%, #0066e6 100%);
+  color: #ffffff;
+  font-weight: 700;
+  opacity: 1;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.58),
+    0 6px 16px rgba(10, 132, 255, 0.36);
+}
+
+.lg-cal-yearbar {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 4px;
+}
+.lg-cal-yearlbl {
+  font: 700 15px/1.2 var(--font-display);
+  font-variant-numeric: tabular-nums;
+}
+.lg-cal-months {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  padding: 4px 0;
+}
+.lg-cal-mbtn {
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 6px;
+  background: rgba(255, 255, 255, 0.28);
+  color: var(--ink);
+  font: 600 13px/1.1 var(--font-body);
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  transition: background 0.16s var(--cal-ease), transform 0.16s var(--cal-ease), color 0.16s ease;
+}
+.lg-cal-mbtn:hover:not(.is-selected) {
+  background: rgba(255, 255, 255, 0.56);
+  transform: scale(1.04);
+}
+.lg-cal-mbtn.is-today:not(.is-selected) {
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+.lg-cal-foot {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.36);
+}
+.lg-cal-footbtn {
+  border: 0;
+  border-radius: 999px;
+  padding: 6px 13px;
+  font: 600 12.5px/1.2 var(--font-body);
+  cursor: pointer;
+  transition: background 0.18s var(--cal-ease), transform 0.18s var(--cal-ease);
+}
+.lg-cal-footbtn.ghost {
+  background: transparent;
+  color: var(--muted);
+}
+.lg-cal-footbtn.ghost:hover {
+  background: rgba(255, 255, 255, 0.42);
+  color: var(--ink);
+}
+.lg-cal-footbtn.accent {
+  background: rgba(255, 255, 255, 0.48);
+  color: var(--accent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+.lg-cal-footbtn.accent:hover {
+  background: rgba(255, 255, 255, 0.78);
+  transform: scale(1.03);
+}
+.lg-cal-footbtn:active { transform: scale(0.95); }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-mode="day"]) .lg-cal-title,
+  :root:not([data-theme="light"]):not([data-mode="day"]) .lg-cal-nav,
+  :root:not([data-theme="light"]):not([data-mode="day"]) .lg-cal-mbtn,
+  :root:not([data-theme="light"]):not([data-mode="day"]) .lg-cal-footbtn.accent {
+    background: rgba(255, 255, 255, 0.11);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  }
+  :root:not([data-theme="light"]):not([data-mode="day"]) .lg-cal-day:hover:not(.is-selected),
+  :root:not([data-theme="light"]):not([data-mode="day"]) .lg-cal-title:hover,
+  :root:not([data-theme="light"]):not([data-mode="day"]) .lg-cal-nav:hover,
+  :root:not([data-theme="light"]):not([data-mode="day"]) .lg-cal-mbtn:hover:not(.is-selected),
+  :root:not([data-theme="light"]):not([data-mode="day"]) .lg-cal-footbtn.ghost:hover,
+  :root:not([data-theme="light"]):not([data-mode="day"]) .lg-cal-footbtn.accent:hover {
+    background: rgba(255, 255, 255, 0.22);
+  }
+  :root:not([data-theme="light"]):not([data-mode="day"]) .lg-cal-foot {
+    border-top-color: rgba(255, 255, 255, 0.12);
+  }
+}
+:root[data-theme="dark"]:not([data-mode="day"]) .lg-cal-title,
+:root[data-theme="dark"]:not([data-mode="day"]) .lg-cal-nav,
+:root[data-theme="dark"]:not([data-mode="day"]) .lg-cal-mbtn,
+:root[data-theme="dark"]:not([data-mode="day"]) .lg-cal-footbtn.accent,
+:root[data-mode="night"] .lg-cal-title,
+:root[data-mode="night"] .lg-cal-nav,
+:root[data-mode="night"] .lg-cal-mbtn,
+:root[data-mode="night"] .lg-cal-footbtn.accent {
+  background: rgba(255, 255, 255, 0.11);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+:root[data-theme="dark"]:not([data-mode="day"]) .lg-cal-day:hover:not(.is-selected),
+:root[data-theme="dark"]:not([data-mode="day"]) .lg-cal-title:hover,
+:root[data-theme="dark"]:not([data-mode="day"]) .lg-cal-nav:hover,
+:root[data-theme="dark"]:not([data-mode="day"]) .lg-cal-mbtn:hover:not(.is-selected),
+:root[data-theme="dark"]:not([data-mode="day"]) .lg-cal-footbtn.ghost:hover,
+:root[data-theme="dark"]:not([data-mode="day"]) .lg-cal-footbtn.accent:hover,
+:root[data-mode="night"] .lg-cal-day:hover:not(.is-selected),
+:root[data-mode="night"] .lg-cal-title:hover,
+:root[data-mode="night"] .lg-cal-nav:hover,
+:root[data-mode="night"] .lg-cal-mbtn:hover:not(.is-selected),
+:root[data-mode="night"] .lg-cal-footbtn.ghost:hover,
+:root[data-mode="night"] .lg-cal-footbtn.accent:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+:root[data-theme="dark"]:not([data-mode="day"]) .lg-cal-foot,
+:root[data-mode="night"] .lg-cal-foot {
+  border-top-color: rgba(255, 255, 255, 0.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lg-cal.is-open, .lg-cal.is-above.is-open { animation: none; }
+  .lg-cal-title, .lg-cal-nav, .lg-cal-day, .lg-cal-mbtn, .lg-cal-footbtn, .lg-cal-caret { transition: none; }
+}
+
+/* ================= Liquid Glass Modal ("Yangi task" & sheets) ================= */
+dialog#modal::backdrop {
+  background: rgba(15, 23, 42, 0.24);
+  backdrop-filter: blur(10px) saturate(135%);
+  -webkit-backdrop-filter: blur(10px) saturate(135%);
+}
+
+dialog#modal {
+  border-radius: 28px;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.68) 0%, rgba(232, 241, 255, 0.44) 48%, rgba(255, 255, 255, 0.56) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.76);
+  backdrop-filter: blur(30px) saturate(195%) brightness(1.04);
+  -webkit-backdrop-filter: blur(30px) saturate(195%) brightness(1.04);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.92),
+    inset 0 -1.5px 0 rgba(255, 255, 255, 0.35),
+    inset 1.5px 0 0 rgba(255, 255, 255, 0.45),
+    inset -1.5px 0 0 rgba(255, 255, 255, 0.30),
+    0 30px 90px rgba(15, 23, 42, 0.24),
+    0 6px 20px rgba(0, 112, 244, 0.08);
+}
+
+dialog#modal .m-head {
+  padding: 20px 24px 14px;
+  background: rgba(255, 255, 255, 0.16);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.42);
+}
+
+dialog#modal .m-head .icon-btn {
+  background: rgba(255, 255, 255, 0.42);
+  color: var(--ink);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 2px 6px rgba(15, 23, 42, 0.06);
+  transition: background 0.18s cubic-bezier(0.3, 1.5, 0.5, 1), transform 0.18s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+dialog#modal .m-head .icon-btn:hover {
+  background: rgba(255, 255, 255, 0.74);
+  transform: scale(1.08);
+}
+dialog#modal .m-head .icon-btn:active {
+  transform: scale(0.94);
+}
+
+dialog#modal .m-tabs {
+  margin: 10px 24px 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.32);
+  border: 1px solid rgba(255, 255, 255, 0.52);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+dialog#modal .m-body {
+  padding: 14px 24px 18px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(15, 23, 42, 0.16) transparent;
+}
+
+dialog#modal .field > span,
+dialog#modal .field > legend {
+  color: color-mix(in srgb, var(--ink) 74%, var(--muted));
+}
+
+dialog#modal input[type="text"],
+dialog#modal input[type="search"],
+dialog#modal input[type="date"],
+dialog#modal input[type="number"],
+dialog#modal input[type="password"],
+dialog#modal select,
+dialog#modal textarea {
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.48);
+  border: 1px solid rgba(255, 255, 255, 0.68);
+  box-shadow:
+    inset 0 1px 2px rgba(15, 23, 42, 0.05),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.65);
+  transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.2s ease;
+}
+
+dialog#modal input[type="text"]:hover:not(:disabled):not(:focus),
+dialog#modal input[type="search"]:hover:not(:disabled):not(:focus),
+dialog#modal input[type="date"]:hover:not(:disabled):not(:focus),
+dialog#modal input[type="number"]:hover:not(:disabled):not(:focus),
+dialog#modal input[type="password"]:hover:not(:disabled):not(:focus),
+dialog#modal select:hover:not(:disabled):not(:focus),
+dialog#modal textarea:hover:not(:disabled):not(:focus) {
+  background: rgba(255, 255, 255, 0.64);
+}
+
+dialog#modal input:focus,
+dialog#modal select:focus,
+dialog#modal textarea:focus {
+  background: rgba(255, 255, 255, 0.78);
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+dialog#modal .ai-btn {
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.58) 0%, rgba(218, 236, 255, 0.36) 55%, rgba(238, 228, 255, 0.38) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.76);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.90),
+    0 6px 20px rgba(10, 132, 255, 0.09);
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.22s ease, transform 0.16s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+dialog#modal .ai-btn:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.76) 0%, rgba(212, 234, 255, 0.52) 55%, rgba(235, 224, 255, 0.50) 100%);
+  border-color: rgba(255, 255, 255, 0.92);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 10px 26px rgba(10, 132, 255, 0.16);
+  transform: translateY(-1px);
+}
+
+dialog#modal .ai-card,
+dialog#modal .ai-applied {
+  background: rgba(255, 255, 255, 0.46);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 8px 24px rgba(15, 23, 42, 0.07);
+}
+dialog#modal .ai-person {
+  background: rgba(255, 255, 255, 0.52);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.55);
+}
+
+dialog#modal .pick span {
+  background: rgba(255, 255, 255, 0.46);
+  border: 1px solid rgba(255, 255, 255, 0.66);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82), 0 2px 6px rgba(15, 23, 42, 0.05);
+}
+dialog#modal .pick span:hover {
+  background: rgba(255, 255, 255, 0.74);
+}
+dialog#modal .pick input:checked + span {
+  background: linear-gradient(145deg, #2795ff 0%, #0a84ff 55%, #0066e6 100%);
+  border-color: rgba(255, 255, 255, 0.45);
+  color: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.58), 0 6px 16px rgba(10, 132, 255, 0.30);
+}
+dialog#modal .pick.is-owner input:checked + span,
+dialog#modal .pick.is-owner input:disabled + span {
+  background: linear-gradient(145deg, rgba(255, 214, 102, 0.62), rgba(245, 166, 35, 0.38));
+  border-color: rgba(255, 224, 130, 0.82);
+  color: var(--ink);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78), 0 4px 12px rgba(227, 160, 8, 0.16);
+}
+
+dialog#modal .m-summary,
+dialog#modal .c-body,
+dialog#modal .files li,
+dialog#modal .p-stats > div,
+dialog#modal .mini-tasks li,
+dialog#modal .edit-log {
+  background: rgba(255, 255, 255, 0.44);
+  border: 1px solid rgba(255, 255, 255, 0.64);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
+}
+dialog#modal .comment.mine .c-body {
+  background: rgba(10, 132, 255, 0.14);
+  border-color: rgba(10, 132, 255, 0.28);
+}
+dialog#modal .dropzone {
+  background: rgba(10, 132, 255, 0.06);
+  border-color: color-mix(in srgb, var(--accent) 42%, rgba(255, 255, 255, 0.7));
+}
+
+dialog#modal .m-foot {
+  padding: 14px 24px 18px;
+  background: rgba(255, 255, 255, 0.22);
+  border-top: 1px solid rgba(255, 255, 255, 0.48);
+}
+dialog#modal .m-foot .btn {
+  border-radius: 999px;
+}
+dialog#modal .m-foot .btn.primary {
+  background: linear-gradient(145deg, #2795ff 0%, #0a84ff 55%, #0066e6 100%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 6px 18px rgba(10, 132, 255, 0.32);
+}
+dialog#modal .m-foot .btn.primary:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.68),
+    0 8px 22px rgba(10, 132, 255, 0.42);
+}
+dialog#modal .m-foot .btn.ghost:hover {
+  background: rgba(255, 255, 255, 0.46);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal::backdrop {
+    background: rgba(4, 8, 18, 0.52);
+  }
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal {
+    background: linear-gradient(155deg, rgba(24, 34, 58, 0.80) 0%, rgba(12, 18, 34, 0.66) 100%);
+    border-color: rgba(255, 255, 255, 0.22);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.24),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.08),
+      0 32px 96px rgba(0, 0, 0, 0.58),
+      0 6px 22px rgba(10, 132, 255, 0.14);
+  }
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal .m-head {
+    background: rgba(255, 255, 255, 0.04);
+    border-bottom-color: rgba(255, 255, 255, 0.12);
+  }
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal .m-foot {
+    background: rgba(255, 255, 255, 0.04);
+    border-top-color: rgba(255, 255, 255, 0.12);
+  }
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal .m-head .icon-btn,
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal .m-tabs,
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal input[type="text"],
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal input[type="search"],
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal input[type="date"],
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal input[type="number"],
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal input[type="password"],
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal select,
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal textarea,
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal .pick span,
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal .ai-card,
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal .ai-applied,
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal .ai-person,
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal .m-summary,
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal .c-body,
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal .files li,
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal .p-stats > div,
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal .mini-tasks li,
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal .edit-log {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: rgba(255, 255, 255, 0.16);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  }
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal .ai-btn {
+    background: linear-gradient(135deg, rgba(10, 132, 255, 0.18) 0%, rgba(120, 80, 230, 0.14) 100%);
+    border-color: rgba(255, 255, 255, 0.20);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.20), 0 8px 24px rgba(0, 0, 0, 0.24);
+  }
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal .pick span:hover,
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal .m-head .icon-btn:hover,
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal .m-foot .btn.ghost:hover {
+    background: rgba(255, 255, 255, 0.18);
+  }
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal input:focus,
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal select:focus,
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal textarea:focus {
+    background: rgba(255, 255, 255, 0.14);
+  }
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal .m-body {
+    scrollbar-color: rgba(255, 255, 255, 0.20) transparent;
+  }
+}
+
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal::backdrop,
+:root[data-mode="night"] dialog#modal::backdrop {
+  background: rgba(4, 8, 18, 0.52);
+}
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal,
+:root[data-mode="night"] dialog#modal {
+  background: linear-gradient(155deg, rgba(24, 34, 58, 0.80) 0%, rgba(12, 18, 34, 0.66) 100%);
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.08),
+    0 32px 96px rgba(0, 0, 0, 0.58),
+    0 6px 22px rgba(10, 132, 255, 0.14);
+}
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal .m-head,
+:root[data-mode="night"] dialog#modal .m-head {
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal .m-foot,
+:root[data-mode="night"] dialog#modal .m-foot {
+  background: rgba(255, 255, 255, 0.04);
+  border-top-color: rgba(255, 255, 255, 0.12);
+}
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal .m-head .icon-btn,
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal .m-tabs,
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal input[type="text"],
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal input[type="search"],
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal input[type="date"],
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal input[type="number"],
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal input[type="password"],
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal select,
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal textarea,
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal .pick span,
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal .ai-card,
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal .ai-applied,
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal .ai-person,
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal .m-summary,
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal .c-body,
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal .files li,
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal .p-stats > div,
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal .mini-tasks li,
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal .edit-log,
+:root[data-mode="night"] dialog#modal .m-head .icon-btn,
+:root[data-mode="night"] dialog#modal .m-tabs,
+:root[data-mode="night"] dialog#modal input[type="text"],
+:root[data-mode="night"] dialog#modal input[type="search"],
+:root[data-mode="night"] dialog#modal input[type="date"],
+:root[data-mode="night"] dialog#modal input[type="number"],
+:root[data-mode="night"] dialog#modal input[type="password"],
+:root[data-mode="night"] dialog#modal select,
+:root[data-mode="night"] dialog#modal textarea,
+:root[data-mode="night"] dialog#modal .pick span,
+:root[data-mode="night"] dialog#modal .ai-card,
+:root[data-mode="night"] dialog#modal .ai-applied,
+:root[data-mode="night"] dialog#modal .ai-person,
+:root[data-mode="night"] dialog#modal .m-summary,
+:root[data-mode="night"] dialog#modal .c-body,
+:root[data-mode="night"] dialog#modal .files li,
+:root[data-mode="night"] dialog#modal .p-stats > div,
+:root[data-mode="night"] dialog#modal .mini-tasks li,
+:root[data-mode="night"] dialog#modal .edit-log {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal .ai-btn,
+:root[data-mode="night"] dialog#modal .ai-btn {
+  background: linear-gradient(135deg, rgba(10, 132, 255, 0.18) 0%, rgba(120, 80, 230, 0.14) 100%);
+  border-color: rgba(255, 255, 255, 0.20);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.20), 0 8px 24px rgba(0, 0, 0, 0.24);
+}
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal .pick span:hover,
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal .m-head .icon-btn:hover,
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal .m-foot .btn.ghost:hover,
+:root[data-mode="night"] dialog#modal .pick span:hover,
+:root[data-mode="night"] dialog#modal .m-head .icon-btn:hover,
+:root[data-mode="night"] dialog#modal .m-foot .btn.ghost:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal input:focus,
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal select:focus,
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal textarea:focus,
+:root[data-mode="night"] dialog#modal input:focus,
+:root[data-mode="night"] dialog#modal select:focus,
+:root[data-mode="night"] dialog#modal textarea:focus {
+  background: rgba(255, 255, 255, 0.14);
+}
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal .m-body,
+:root[data-mode="night"] dialog#modal .m-body {
+  scrollbar-color: rgba(255, 255, 255, 0.20) transparent;
+}
+
+/* ================= Liquid Glass Select Dropdown ================= */
+select:not([multiple]) {
+  cursor: pointer;
+}
+select.lg-sel-active {
+  background: var(--surface);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+dialog#modal select.lg-sel-active {
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.lg-sel {
+  --sel-ease: cubic-bezier(0.3, 1.5, 0.5, 1);
+  position: fixed;
+  z-index: 130;
+  padding: 6px;
+  border-radius: 22px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.68) 0%, rgba(226, 239, 255, 0.40) 52%, rgba(255, 255, 255, 0.54) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.76);
+  backdrop-filter: blur(26px) saturate(195%) brightness(1.05);
+  -webkit-backdrop-filter: blur(26px) saturate(195%) brightness(1.05);
+  box-shadow:
+    0 22px 54px rgba(15, 23, 42, 0.20),
+    0 4px 14px rgba(0, 112, 244, 0.08);
+  transform-origin: top left;
+  user-select: none;
+}
+.lg-sel.is-above { transform-origin: bottom left; }
+.lg-sel[hidden] { display: none; }
+.lg-sel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    inset 2px 2px 6px -2px rgba(255, 255, 255, 0.85),
+    inset -2px -2px 6px 1px rgba(255, 255, 255, 0.45),
+    inset 0 -2px 0 rgba(255, 255, 255, 0.35);
+  pointer-events: none;
+  z-index: 2;
+}
+.lg-sel.is-open {
+  animation: lgCalIn 0.22s cubic-bezier(0.34, 1.45, 0.64, 1);
+}
+.lg-sel.is-above.is-open {
+  animation: lgCalInUp 0.22s cubic-bezier(0.34, 1.45, 0.64, 1);
+}
+
+.lg-sel-list {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  gap: 2px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(15, 23, 42, 0.16) transparent;
+}
+.lg-sel-grp {
+  padding: 7px 12px 3px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.lg-sel-grp:first-child { padding-top: 4px; }
+
+.lg-sel-opt {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  border: 0;
+  border-radius: 14px;
+  padding: 9px 12px;
+  background: transparent;
+  color: var(--ink);
+  font: 500 13.5px/1.25 var(--font-body);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.14s var(--sel-ease), transform 0.14s var(--sel-ease), color 0.12s ease, box-shadow 0.16s ease;
+}
+.lg-sel-opt:hover:not(.is-selected):not(:disabled),
+.lg-sel-opt.is-hi:not(.is-selected):not(:disabled) {
+  background: rgba(255, 255, 255, 0.58);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+.lg-sel-opt:active:not(:disabled) {
+  transform: scale(0.985);
+}
+.lg-sel-opt.is-selected {
+  background: linear-gradient(145deg, #2795ff 0%, #0a84ff 55%, #0066e6 100%);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.56),
+    0 6px 16px rgba(10, 132, 255, 0.30);
+}
+.lg-sel-opt.is-disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.lg-sel-lbl {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lg-sel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.55);
+}
+.lg-sel-opt.is-selected .lg-sel-dot {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.72);
+}
+.lg-sel-chk {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  opacity: 0.96;
+}
+.lg-sel-empty {
+  padding: 12px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-mode="day"]) .lg-sel {
+    background: linear-gradient(155deg, rgba(24, 34, 58, 0.80) 0%, rgba(12, 18, 34, 0.66) 100%);
+    border-color: rgba(255, 255, 255, 0.22);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.58), 0 4px 16px rgba(10, 132, 255, 0.14);
+  }
+  :root:not([data-theme="light"]):not([data-mode="day"]) .lg-sel::after {
+    box-shadow:
+      inset 1.5px 1.5px 4px -1px rgba(255, 255, 255, 0.24),
+      inset -1.5px -1.5px 4px 0 rgba(255, 255, 255, 0.10);
+  }
+  :root:not([data-theme="light"]):not([data-mode="day"]) .lg-sel-opt:hover:not(.is-selected):not(:disabled),
+  :root:not([data-theme="light"]):not([data-mode="day"]) .lg-sel-opt.is-hi:not(.is-selected):not(:disabled) {
+    background: rgba(255, 255, 255, 0.14);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  }
+  :root:not([data-theme="light"]):not([data-mode="day"]) .lg-sel-list {
+    scrollbar-color: rgba(255, 255, 255, 0.20) transparent;
+  }
+  :root:not([data-theme="light"]):not([data-mode="day"]) dialog#modal select.lg-sel-active {
+    background: rgba(255, 255, 255, 0.14);
+  }
+}
+
+:root[data-theme="dark"]:not([data-mode="day"]) .lg-sel,
+:root[data-mode="night"] .lg-sel {
+  background: linear-gradient(155deg, rgba(24, 34, 58, 0.80) 0%, rgba(12, 18, 34, 0.66) 100%);
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.58), 0 4px 16px rgba(10, 132, 255, 0.14);
+}
+:root[data-theme="dark"]:not([data-mode="day"]) .lg-sel::after,
+:root[data-mode="night"] .lg-sel::after {
+  box-shadow:
+    inset 1.5px 1.5px 4px -1px rgba(255, 255, 255, 0.24),
+    inset -1.5px -1.5px 4px 0 rgba(255, 255, 255, 0.10);
+}
+:root[data-theme="dark"]:not([data-mode="day"]) .lg-sel-opt:hover:not(.is-selected):not(:disabled),
+:root[data-theme="dark"]:not([data-mode="day"]) .lg-sel-opt.is-hi:not(.is-selected):not(:disabled),
+:root[data-mode="night"] .lg-sel-opt:hover:not(.is-selected):not(:disabled),
+:root[data-mode="night"] .lg-sel-opt.is-hi:not(.is-selected):not(:disabled) {
+  background: rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+:root[data-theme="dark"]:not([data-mode="day"]) .lg-sel-list,
+:root[data-mode="night"] .lg-sel-list {
+  scrollbar-color: rgba(255, 255, 255, 0.20) transparent;
+}
+:root[data-theme="dark"]:not([data-mode="day"]) dialog#modal select.lg-sel-active,
+:root[data-mode="night"] dialog#modal select.lg-sel-active {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lg-sel.is-open, .lg-sel.is-above.is-open { animation: none; }
+  .lg-sel-opt { transition: none; }
+}
+
+
+
+

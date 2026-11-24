@@ -230,6 +230,7 @@ const actions = {
 function applySimRole(val) {
   const [role, sid] = String(val || "").split("|");
   S.sim = { role: ROLE_LABEL[role] ? role : "rahbar", staffId: sid || null };
+  if (!sid) simFilter = "all";
   S.tf.mine = !!sid;
   toggleSimMenu(false);
   bump(); render();
