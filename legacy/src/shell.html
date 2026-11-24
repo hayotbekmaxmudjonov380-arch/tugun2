@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tugun</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/*__CSS__*/
+</style>
+</head>
+<body>
+<div class="bg" aria-hidden="true"><canvas id="bg-waves"></canvas></div>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#tuzilma" aria-label="Tugun: tuzilmaga qaytish">
+      <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true" class="brand-mark">
+        <rect width="34" height="34" rx="9" fill="var(--ink)"/>
+        <path d="M7 10.5C13 10.5 14 23.5 27 23.5" stroke="#34C759" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+        <path d="M7 23.5C13 23.5 14 10.5 27 10.5" stroke="#0A84FF" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+        <circle cx="17" cy="17" r="4.2" fill="var(--paper)"/><circle cx="17" cy="17" r="2" fill="var(--ink)"/>
+      </svg>
+      <span><strong>Tugun</strong></span>
+    </a>
+    <nav class="tabs" aria-label="Asosiy bo'limlar">
+      <a href="#tuzilma" data-nav="tuzilma">Tuzilma</a>
+      <a href="#dashboard" data-nav="dashboard">Dashboard</a>
+      <a href="#tasklar" data-nav="tasklar">Tasklar</a>
+      <a href="#davomat" data-nav="davomat">Davomat</a>
+      <a href="#nizom" data-nav="nizom">Nizom</a>
+      <a href="#sozlamalar" data-nav="sozlamalar">Sozlamalar</a>
+      <a href="#qollanma" data-nav="qollanma">Qo'llanma</a>
+    </nav>
+    <div class="top-actions">
+      <button type="button" class="search-btn" data-action="search" aria-label="Qidirish">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span class="sb-txt">Qidirish</span><kbd id="kbd-k">⌘K</kbd>
+      </button>
+      <button type="button" class="bell" id="bell" data-action="bell" aria-label="Bildirishnomalar" aria-expanded="false" aria-controls="notif">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        <span class="badge" id="bell-n" hidden>0</span>
+      </button>
+      <button type="button" class="bell" id="bg-btn" data-action="bgpick" aria-label="Orqa fonni tanlash" title="Orqa fon" aria-expanded="false" aria-controls="bgpick">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="4"/><path d="M3 15c3-3 5-3 8 0s5 3 10-1"/><circle cx="16" cy="9" r="1.6"/></svg>
+      </button>
+      <div class="mode-seg" role="group" aria-label="Fon rejimi">
+        <button type="button" data-mode-set="day" aria-pressed="false" title="Kunduzgi fon" aria-label="Kunduzgi fon">☀︎</button>
+        <button type="button" data-mode-set="night" aria-pressed="false" title="Kechki neon fon" aria-label="Kechki neon fon">☾</button>
+        <button type="button" data-mode-set="auto" aria-pressed="false" title="Qurilma sozlamasiga qarab" aria-label="Avtomatik">Avto</button>
+      </div>
+      <button type="button" class="whoami" id="whoami" data-action="whoami" aria-label="Mening profilim"></button>
+      <button type="button" class="btn primary" id="top-new" data-action="new-task" hidden>+ Yangi task</button>
+    </div>
+  </div>
+</header>
+<div class="notif" id="notif" role="region" aria-label="Bildirishnomalar" hidden></div>
+<div class="notif bgpick" id="bgpick" role="region" aria-label="Orqa fon" hidden></div>
+<div class="wrap" id="banner" aria-live="polite"></div>
+<main class="wrap" id="view"></main>
+<dialog id="modal" aria-labelledby="m-title"></dialog>
+<dialog id="spot" class="spot" aria-label="Tezkor qidiruv"></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="viz-tip" role="tooltip"></div>
+<script>
+/*__JS__*/
+</script>
+</body>
+</html>
