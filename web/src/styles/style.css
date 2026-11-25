@@ -203,7 +203,7 @@ textarea { resize: vertical; width: 100%; }
 .banner::before { content: ""; width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--accent); }
 .banner.warn::before { background: #FF9500; }
 .banner.crit::before { background: var(--crit); }
-.banner span { flex: 1; min-width: 220px; }
+.banner > span { flex: 1; min-width: 220px; }
 #toast { position: fixed; left: 50%; bottom: 26px; transform: translate(-50%, 16px) scale(.98); background: color-mix(in srgb, var(--ink) 88%, transparent); color: var(--paper); backdrop-filter: blur(20px); padding: 11px 18px; border-radius: 999px; font-size: 14px; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; z-index: 60; max-width: calc(100vw - 32px); }
 #toast.show { opacity: 1; transform: translate(-50%, 0) scale(1); }
 #toast.crit { background: var(--crit); color: #fff; }

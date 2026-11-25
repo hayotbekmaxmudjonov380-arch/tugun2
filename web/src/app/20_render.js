@@ -20,11 +20,9 @@ function render() {
   else if (S.view === "nizom") html = viewNizom();
   else if (S.view === "kiosk") html = viewKiosk();
   else html = viewOrg();
-  if (window.__tugunDashAcc) window.__tugunDashAcc.unmount();
   view.innerHTML = html;
   scrolls.forEach(([id, l, t]) => { const el = document.getElementById(id); if (el) { el.scrollLeft = l; el.scrollTop = t; } });
   postRender();
-  if (window.__tugunWaterline) window.__tugunWaterline.afterRender(S.view, S.deptId);
   if (keep) { const el = document.getElementById(keep.id); if (el) { el.focus({ preventScroll: true }); try { if (keep.s != null) el.setSelectionRange(keep.s, keep.e); } catch (e) {} } }
   if (notifOpen) renderNotif();
   if (dlg.open && modalCtx && modalCtx.type === "task") refreshTaskModal();

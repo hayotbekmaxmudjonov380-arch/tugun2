@@ -74,7 +74,6 @@ function setTab(tab) {
   modalCtx.tab = tab;
   $$("[data-panel]", dlg).forEach(p => { p.hidden = p.dataset.panel !== tab; });
   $$('[data-action="task-tab"]', dlg).forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === tab)));
-  if (window.__tugunWaterline) window.__tugunWaterline.syncModal();
   const save = $("#task-save", dlg); if (save) save.hidden = tab !== "main";
   if (tab === "comments") { renderComments(); const ta = $("#cm-text", dlg); if (ta) ta.focus(); }
 }

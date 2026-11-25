@@ -9,7 +9,6 @@ function showModal(html, ctx) {
   const f = dlg.querySelector("[autofocus]") || dlg.querySelector("input:not([type=hidden]):not([disabled]), select:not([disabled]), textarea:not([disabled])");
   if (f) f.focus();
   else { const h = dlg.querySelector("#m-title"); if (h) { h.tabIndex = -1; h.focus({ preventScroll: true }); } }
-  if (window.__tugunWaterline) window.__tugunWaterline.syncModal();
 }
 function cleanupModal() {
   if (modalCtx) {

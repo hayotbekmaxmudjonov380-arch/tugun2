@@ -1,6 +1,3 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.0";
-
 const BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
@@ -38,7 +35,7 @@ async function sendTelegramMessage(chatId: number | string, text: string) {
   return res.json();
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -75,20 +72,24 @@ serve(async (req) => {
       );
     }
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-      auth: { persistSession: false },
+    const rpcRes = await fetch(`${SUPABASE_URL}/rest/v1/rpc/create_login_code`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: SUPABASE_SERVICE_ROLE_KEY,
+        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+      },
+      body: JSON.stringify({ p_identifier: identifier.trim() }),
     });
 
-    const { data, error } = await supabase.rpc("create_login_code", {
-      p_identifier: identifier.trim(),
-    });
-
-    if (error) {
+    if (!rpcRes.ok) {
       return new Response(
         JSON.stringify({ ok: false, error: "db_error", message: "Tizim xatosi yuz berdi." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    const data = await rpcRes.json();
 
     // Rate-limit xatosi
     if (data?.error === "rate_limit") {

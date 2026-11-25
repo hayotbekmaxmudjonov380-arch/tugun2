@@ -6,54 +6,42 @@ import "virtual:tugun-app";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import DemoOne from "@/components/ui/demo";
-import TopNav from "@/components/TopNav";
-import DashAccordion from "@/components/DashAccordion";
-import { initGlobalWaterline } from "@/components/ui/waterline-global";
-
-// Activate global Waterline animations across pills, buttons, cards, and views
-initGlobalWaterline();
-
-// Mount Liquid Glass Navbar into topbar without altering legacy app structure
-const navContainer = document.getElementById("tugun-nav-root");
-if (navContainer) {
-  ReactDOM.createRoot(navContainer).render(React.createElement(TopNav));
-}
-
-// Mount/unmount Liquid Glass Accordion inside #dashboard without breaking legacy render()
-let dashAccRoot = null;
-let dashAccContainer = null;
-window.__tugunDashAcc = {
-  mount(container, payload, savedOpen, onOpenChange) {
-    if (!container || !payload) return;
-    if (dashAccRoot && dashAccContainer !== container) {
-      dashAccRoot.unmount();
-      dashAccRoot = null;
-      dashAccContainer = null;
-    }
-    if (!dashAccRoot) {
-      dashAccRoot = ReactDOM.createRoot(container);
-      dashAccContainer = container;
-    }
-    dashAccRoot.render(
-      React.createElement(DashAccordion, { payload, savedOpen, onOpenChange })
-    );
-  },
-  unmount() {
-    if (dashAccRoot) {
-      dashAccRoot.unmount();
-      dashAccRoot = null;
-      dashAccContainer = null;
-    }
-  },
-};
-if (window.__tugunDashSync) window.__tugunDashSync();
+import { sb } from "./supabase";
 
 // Handle #login route for React Login Form
 let authRoot = null;
+let authSession = null;
+let authChecked = !sb;
+let pageLoaded = document.readyState === "complete";
+
+function tryDismissPreloader() {
+  if (!pageLoaded || !authChecked) return;
+  const el = document.getElementById("tugun-preloader");
+  if (!el || el.dataset.dismissing) return;
+  el.dataset.dismissing = "1";
+  const startedAt = window["__tgPreloadStart"] || Date.now();
+  const wait = Math.max(0, 1350 - (Date.now() - startedAt));
+  setTimeout(() => {
+    document.documentElement.classList.remove("tugun-preloading");
+    el.classList.add("is-done");
+    setTimeout(() => {
+      el.remove();
+      document.getElementById("tugun-preload-style")?.remove();
+    }, 320);
+  }, wait);
+}
+
 function checkAuthRoute() {
-  const isLogin = window.location.hash === "#login";
+  if (!authChecked) return;
+  const mustLogin = Boolean(sb && !authSession);
+  const isLogin = mustLogin || window.location.hash === "#login";
+
+  if (mustLogin && window.location.hash !== "#login") {
+    window.history.replaceState(null, "", "#login");
+  }
+
   let container = document.getElementById("auth-root");
-  
+
   if (isLogin) {
     if (!container) {
       container = document.createElement("div");
@@ -75,7 +63,38 @@ function checkAuthRoute() {
 
 window.addEventListener("hashchange", checkAuthRoute);
 window.addEventListener("DOMContentLoaded", checkAuthRoute);
-checkAuthRoute();
+
+if (sb) {
+  sb.auth.getSession()
+    .then(({ data }) => {
+      authSession = data?.session || null;
+    })
+    .catch(() => {
+      authSession = null;
+    })
+    .finally(() => {
+      authChecked = true;
+      checkAuthRoute();
+      requestAnimationFrame(tryDismissPreloader);
+    });
+
+  sb.auth.onAuthStateChange((_event, session) => {
+    authSession = session || null;
+    authChecked = true;
+    checkAuthRoute();
+  });
+} else {
+  checkAuthRoute();
+}
+
+if (pageLoaded) {
+  requestAnimationFrame(tryDismissPreloader);
+} else {
+  window.addEventListener("load", () => {
+    pageLoaded = true;
+    requestAnimationFrame(tryDismissPreloader);
+  }, { once: true });
+}
 
 if (import.meta.env.PROD && "serviceWorker" in navigator) {
   window.addEventListener("load", () => { navigator.serviceWorker.register("/sw.js").catch(() => {}); });
