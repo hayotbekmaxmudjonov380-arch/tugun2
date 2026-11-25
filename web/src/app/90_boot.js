@@ -349,6 +349,7 @@ function start() {
   try { S.seenLocal = localStorage.getItem("tg-seen") || ""; } catch (e) {}
   const kbd = $("#kbd-k"); if (kbd && !/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)) kbd.textContent = "Ctrl K";
   try { startWaves(); } catch (e) {}
+  try { startFoldBg(); } catch (e) {}
   try { let lastW = 0; new ResizeObserver(() => { const w = main().clientWidth; if (w === lastW) return; lastW = w; if (S.view === "dashboard") requestAnimationFrame(postRender); }).observe(main()); } catch (e) {}
   window.addEventListener("hashchange", () => { route(); window.scrollTo(0, 0); });
   document.addEventListener("visibilitychange", () => { if (!document.hidden && S.view === "kiosk") kioskWake(true); });

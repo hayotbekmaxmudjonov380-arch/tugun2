@@ -307,22 +307,23 @@ function applyMode(mode) {
 (function () { let m = "auto"; try { m = localStorage.getItem("tg-mode") || "auto"; } catch (e) {} applyMode(m); })();
 document.addEventListener("click", e => { const b = e.target.closest && e.target.closest("[data-mode-set]"); if (b) applyMode(b.dataset.modeSet); const g = e.target.closest && e.target.closest("[data-bg-set]"); if (g) applyBg(g.dataset.bgSet); });
 
-/* ----- orqa fon: 4 uslub (har bir foydalanuvchi o'zi tanlaydi, brauzerida saqlanadi) ----- */
+/* ----- orqa fon: 5 uslub (har bir foydalanuvchi o'zi tanlaydi, brauzerida saqlanadi) ----- */
 const BG_STYLES = [
+  { id: "fold", name: "Suyuq buklama", sub: "Kursor bilan harakatlanuvchi shisha nuri" },
   { id: "neon", name: "Neon to'lqin", sub: "Sony uslubidagi yorug' iplar" },
   { id: "aurora", name: "Aurora", sub: "Sekin suzuvchi rangli nur" },
   { id: "ipak", name: "Ipak", sub: "Bir rangli yumshoq chiziqlar" },
   { id: "toza", name: "Toza", sub: "Harakatsiz, faqat rang" }
 ];
 function applyBg(id) {
-  if (!BG_STYLES.some(b => b.id === id)) id = "neon";
+  if (!BG_STYLES.some(b => b.id === id)) id = "fold";
   document.documentElement.setAttribute("data-bg", id);
-  try { localStorage.setItem("tg-bg", id); } catch (e) {}
+  try { localStorage.setItem("tg-bg-v2", id); } catch (e) {}
   $$("[data-bg-set]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.bgSet === id)));
 }
-(function () { let b = "neon"; try { b = localStorage.getItem("tg-bg") || "neon"; } catch (e) {} applyBg(b); })();
+(function () { let b = "fold"; try { b = localStorage.getItem("tg-bg-v2") || "fold"; } catch (e) {} applyBg(b); })();
 function bgPickerHTML() {
-  const cur = document.documentElement.getAttribute("data-bg") || "neon";
+  const cur = document.documentElement.getAttribute("data-bg") || "fold";
   return `<div class="np-head"><h3>Orqa fon</h3><button type="button" class="icon-btn sm" data-action="close-bgpick" aria-label="Yopish">×</button></div>
     <div class="bg-grid">${BG_STYLES.map(b => `<button type="button" class="bg-opt" data-bg-set="${b.id}" aria-pressed="${b.id === cur}"><span class="bg-sw sw-${b.id}"></span><b>${esc(b.name)}</b><small>${esc(b.sub)}</small></button>`).join("")}</div>
     <p class="hint" style="padding:4px 18px 0">Tanlov faqat sizning qurilmangizda saqlanadi. Kunduzgi va kechki rejimda ham ishlaydi.</p>`;
@@ -340,7 +341,8 @@ function startWaves() {
   const ctx = c.getContext("2d"); if (!ctx) return;
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   let W = 0, H = 0, cfg = null, last = 0, slow = 0, frames = 0, stopped = false, running = false;
-  const style = () => document.documentElement.getAttribute("data-bg") || "neon";
+  const style = () => document.documentElement.getAttribute("data-bg") || "fold";
+  const is2D = () => { const s = style(); return s !== "toza" && s !== "fold"; };
   const readCfg = () => { const cs = getComputedStyle(document.documentElement), v = n => cs.getPropertyValue(n).trim(); cfg = { c: [v("--wave-1"), v("--wave-2"), v("--wave-3")], a: parseFloat(v("--wave-alpha")) || .3, dark: v("--wave-mode") === "dark" }; };
   const resize = () => { const k = .75; W = innerWidth; H = innerHeight; c.width = Math.max(1, Math.round(W * k)); c.height = Math.max(1, Math.round(H * k)); ctx.setTransform(k, 0, 0, k, 0, 0); };
   const ribbons = [
@@ -374,8 +376,8 @@ function startWaves() {
   };
   const draw = t => {
     ctx.clearRect(0, 0, W, H);
+    if (!is2D()) return;
     const st = style(), time = t / 1000;
-    if (st === "toza") return;
     ctx.globalCompositeOperation = cfg.dark ? "lighter" : "source-over";
     if (st === "aurora") {
       const R = Math.max(W, H);
@@ -392,7 +394,7 @@ function startWaves() {
     if (st === "ipak") drawRibbons(silk, time, true); else drawRibbons(ribbons, time, false);
   };
   const loop = t => {
-    if (stopped || style() === "toza") { running = false; return; }
+    if (stopped || !is2D()) { running = false; return; }
     const dt = t - last;
     if (dt >= 45) {
       last = t; draw(t); frames++;
@@ -401,7 +403,7 @@ function startWaves() {
     }
     requestAnimationFrame(loop);
   };
-  const kick = () => { if (!reduce && !stopped && !running && style() !== "toza") { running = true; requestAnimationFrame(loop); } };
+  const kick = () => { if (!reduce && !stopped && !running && is2D()) { running = true; requestAnimationFrame(loop); } };
   readCfg(); resize(); draw(performance.now());
   addEventListener("resize", () => { resize(); draw(performance.now()); });
   const themeChange = () => { readCfg(); draw(performance.now()); kick(); };
